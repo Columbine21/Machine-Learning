@@ -35,46 +35,6 @@ class TreeNode():
         self.split_attr = split_attr
 
 
-def generate_decision_tree(dataset, evaluateFunction=calculate_entropy_value):
-    if dataset.shape[0] == 1:
-        return TreeNode(d_set=dataset)
-    # calculate the cross entropy of current dataset.
-    dataset_value = evaluateFunction(dataset)
-
-    max_gain = 0
-    best_subset = None
-    best_split_attr = None
-
-    for split_attr in dataset.columns[1:]:
-        truthbranch = dataset[dataset[split_attr] == '是']
-        truthbranch.index = range(len(truthbranch))
-        falsebranch = dataset[dataset[split_attr] == '否']
-        falsebranch.index = range(len(falsebranch))
-
-        truth_partion = len(truthbranch) / len(dataset)
-        false_partion = 1 - truth_partion
-        truth_value = evaluateFunction(truthbranch)
-        false_value = evaluateFunction(falsebranch)
-
-        gain = dataset_value - (truth_partion * truth_value) - (false_value * false_partion)
-        if gain > max_gain:
-            max_gain = gain
-            best_subset = (truthbranch, falsebranch)
-            best_split_attr = split_attr
-
-    dcY = {'impurity': '%.3f' % dataset_value, 'samples': '%d' % len(dataset)}
-    print(f"split_attribute : {best_split_attr}, max_gain : {max_gain}")
-    print(dcY)
-    if max_gain > 0:
-        truebranch = generate_decision_tree(best_subset[0], evaluateFunction)
-        falsebranch = generate_decision_tree(best_subset[1], evaluateFunction)
-        return TreeNode(d_set=dataset, truebranch=truebranch,
-                        falsebranch=falsebranch,
-                        split_attr=best_split_attr)
-    else:
-        return TreeNode(d_set=dataset)
-
-
 class DecisionTree():
     def __init__(self, d_set=None, pred_col_name=None, evaluate_function=None):
         self.dataset = d_set
@@ -83,6 +43,47 @@ class DecisionTree():
         self.root = None
 
     def fit(self):
+
+        def generate_decision_tree(dataset, evaluateFunction=calculate_entropy_value):
+            if dataset.shape[0] == 1:
+                return TreeNode(d_set=dataset)
+            # calculate the cross entropy of current dataset.
+            dataset_value = evaluateFunction(dataset)
+
+            max_gain = 0
+            best_subset = None
+            best_split_attr = None
+
+            for split_attr in dataset.columns[1:]:
+                truthbranch = dataset[dataset[split_attr] == '是']
+                truthbranch.index = range(len(truthbranch))
+                falsebranch = dataset[dataset[split_attr] == '否']
+                falsebranch.index = range(len(falsebranch))
+
+                truth_partion = len(truthbranch) / len(dataset)
+                false_partion = 1 - truth_partion
+                truth_value = evaluateFunction(truthbranch)
+                false_value = evaluateFunction(falsebranch)
+
+                gain = dataset_value - (truth_partion * truth_value) - (false_value * false_partion)
+                if gain > max_gain:
+                    max_gain = gain
+                    best_subset = (truthbranch, falsebranch)
+                    best_split_attr = split_attr
+
+            dcY = {'impurity': '%.3f' % dataset_value, 'samples': '%d' % len(dataset)}
+            print(f"split_attribute : {best_split_attr}, max_gain : {max_gain}")
+            print(dcY)
+            if max_gain > 0:
+                truebranch = generate_decision_tree(best_subset[0], evaluateFunction)
+                falsebranch = generate_decision_tree(best_subset[1], evaluateFunction)
+                return TreeNode(d_set=dataset, truebranch=truebranch,
+                                falsebranch=falsebranch,
+                                split_attr=best_split_attr)
+            else:
+                return TreeNode(d_set=dataset)
+
+
         self.root = generate_decision_tree(self.dataset,
                                            evaluateFunction=self.eval_func)
 
