@@ -13,6 +13,7 @@ def construct_dataset(data_path="../data/cluster.dat"):
             dataset.append([float(point_tmp[0]), float(point_tmp[1])])
     return np.array(dataset)
 
+
 class GaussianMixture:
     """Gaussian Mixture.
 
@@ -56,7 +57,7 @@ class GaussianMixture:
             shape (n_components, n_features, n_features) if 'full'
 
         """
-    def __init__(self, train_set, n_components=1, threshold=0.1, max_iter=100, random_state=3333, verbose=False):
+    def __init__(self, train_set, n_components=1, threshold=0.1, max_iter=10, random_state=3333, verbose=False):
 
         self.train_set = train_set
         self.n_components = n_components
@@ -95,13 +96,47 @@ class GaussianMixture:
 
         self.posterior_matrix = np.empty((n_samples, n_components), dtype=float)
 
+    def train(self):
+        prelikelihood = -np.inf
+
+        for epochs in range(self.max_iter):
+            post_prob = self._estimate_post_prob(self.train_set, self.weights_, self.means_, self.covariances_)
+            nk = self._cal_nk(post_prob)
+            self.weights_ = nk / self.n_samples
+            self.means_ = self._update_means(self.means_, nk, post_prob, self.train_set)
+            self.covariances_ = self._update_covariances(self.means_, self.covariances_, nk, post_prob, self.train_set)
+
+            if epochs % 3 == 2:
+
+                print(f"weights for each cluster: \n{self.weights_}")
+                print(f"means for each cluster: \n{self.means_}")
+                print(f"covariances for each cluster:\n {self.covariances_}")
+                print("***************************************************")
+
+
+
+
     def _estimate_post_prob(self, train_set, weight, means, covariances):
+        """
+        Parameters
+        ----------
+        train_set : array-like, shape (n_samples, n_features)
+
+        weight : array-like, shape (n_components, )
+
+        means : array-like, shape (n_components, n_features)
+
+        covariances: array-like, shape (n_components, n_features, n_features)
+
+        Returns
+        -------
+         post_prob(gamma) : array, shape (n_samples, n_component)
+        """
         probability_density_matrix = self._estimate_pdf(train_set, means, covariances)
 
         numerator = probability_density_matrix * weight.reshape(1, -1)
         Denominator = np.sum(numerator, axis=1).reshape(-1, 1)
         return numerator / Denominator
-
 
     def _estimate_pdf(self, train_set, means, covariances):
         """
@@ -127,10 +162,31 @@ class GaussianMixture:
                 (1/(coef_pi*coef_det)) * np.exp(np.sum(-0.5*shift_input.dot(covInv)*shift_input, axis=1))
         return probability_density_matrix
 
+    def _cal_nk(self, post_prob_matrix):
+        nk = np.sum(post_prob_matrix, axis=0)
+        return nk.reshape(1, self.n_components)
+
+    def _update_means(self, means, nk, post_prob, train_set):
+        means_new = np.zeros_like(means)
+        for index in np.arange(0, self.n_components):
+            sumd = np.sum((post_prob[:, index].reshape(self.n_samples, 1)) * train_set, axis=0)
+            means_new[index, :] = sumd.reshape(1, self.n_features) / nk[:, index]
+        return means_new
+
+    def _update_covariances(self, means, covariances, nk, post_prob, train_set):
+        covariances_new = np.zeros_like(covariances)
+        for index in np.arange(0, self.n_components):
+            shift = train_set - means[index, :]
+            shift_tmp = post_prob[:, index].reshape(self.n_samples, 1) * shift
+            covariances_new[index] = shift_tmp.T.dot(shift) / nk[:, index]
+        return covariances_new
+
+
+
 
 if __name__ == "__main__":
 
     PointSet = construct_dataset()
-    print(f"PointSet has {len(PointSet)} data")
+
     cluster = GaussianMixture(PointSet, n_components=2)
-    print(cluster._estimate_post_prob(PointSet, cluster.weights_ ,cluster.means_, cluster.covariances_)[84])
+    cluster.train()
