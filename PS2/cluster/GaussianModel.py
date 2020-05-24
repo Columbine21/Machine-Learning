@@ -3,6 +3,7 @@
 # Author: Ziqi Yuan <1564123490@qq.com>
 
 import numpy as np
+from matplotlib import pyplot as plt
 
 
 def construct_dataset(data_path="../data/cluster.dat"):
@@ -57,7 +58,7 @@ class GaussianMixture:
             shape (n_components, n_features, n_features) if 'full'
 
         """
-    def __init__(self, train_set, n_components=1, threshold=0.1, max_iter=10, random_state=3333, verbose=False):
+    def __init__(self, train_set, n_components=1, threshold=0.1, max_iter=10, random_state=111, verbose=False):
 
         self.train_set = train_set
         self.n_components = n_components
@@ -100,39 +101,44 @@ class GaussianMixture:
         prelikelihood = -np.inf
 
         for epochs in range(self.max_iter):
-            post_prob = self._estimate_post_prob(self.train_set, self.weights_, self.means_, self.covariances_)
+            probability_density_matrix = self._estimate_pdf(self.train_set, self.means_, self.covariances_)
+            post_prob = self._estimate_post_prob(self.weights_, probability_density_matrix)
             nk = self._cal_nk(post_prob)
             self.weights_ = nk / self.n_samples
             self.means_ = self._update_means(self.means_, nk, post_prob, self.train_set)
             self.covariances_ = self._update_covariances(self.means_, self.covariances_, nk, post_prob, self.train_set)
 
-            if epochs % 3 == 2:
+            if epochs % 10 == 9:
 
                 print(f"weights for each cluster: \n{self.weights_}")
                 print(f"means for each cluster: \n{self.means_}")
                 print(f"covariances for each cluster:\n {self.covariances_}")
                 print("***************************************************")
+                result = self.predict(self.train_set)
+                # print(result)
+                plt.scatter(self.train_set[:, 0], self.train_set[:, 1], .8, c=result)
+                plt.show()
 
+    def predict(self, test_set):
+        result = []
+        probability_density_matrix = self._estimate_pdf(test_set, self.means_, self.covariances_)
+        for row in probability_density_matrix:
+            result.append(np.argmax(row))
+        return np.array(result).reshape(-1)
 
-
-
-    def _estimate_post_prob(self, train_set, weight, means, covariances):
+    def _estimate_post_prob(self, weight, probability_density_matrix):
         """
         Parameters
         ----------
-        train_set : array-like, shape (n_samples, n_features)
-
         weight : array-like, shape (n_components, )
 
-        means : array-like, shape (n_components, n_features)
-
-        covariances: array-like, shape (n_components, n_features, n_features)
+        probability_density_matrix : array-like, shape (n_samples, n_component)
 
         Returns
         -------
          post_prob(gamma) : array, shape (n_samples, n_component)
         """
-        probability_density_matrix = self._estimate_pdf(train_set, means, covariances)
+        # probability_density_matrix = self._estimate_pdf(train_set, means, covariances)
 
         numerator = probability_density_matrix * weight.reshape(1, -1)
         Denominator = np.sum(numerator, axis=1).reshape(-1, 1)
