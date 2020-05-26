@@ -15,6 +15,10 @@ def construct_dataset(data_path="../data/cluster.dat"):
     return np.array(dataset)
 
 
+def train_test_split():
+    pass
+
+
 class GaussianMixture:
     """Gaussian Mixture.
 
@@ -187,6 +191,10 @@ class GaussianMixture:
             covariances_new[index] = shift_tmp.T.dot(shift) / nk[:, index]
         return covariances_new
 
+    def _cal_likelihood(self, weight, probability_density_matrix):
+        sub = np.sum(probability_density_matrix*weight, axis=1)
+        logsub = np.log(sub)
+        return np.sum(logsub)
 
 
 
