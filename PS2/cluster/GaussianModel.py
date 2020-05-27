@@ -85,7 +85,7 @@ class GaussianMixture:
         self.likelihood = None
         self.record_train = []
         self.record_test = []
-        self.color_iter = ['r', 'g', 'b', 'c', 'm']
+        self.color_iter = ['r', 'g', 'b', 'c', 'm', 'orchid', 'y']
         np.random.seed(random_state)
         self.n_samples, self.n_features = train_set.shape
 
@@ -353,48 +353,76 @@ class GaussianMixture:
 if __name__ == "__main__":
 
     PointSet = construct_dataset()
-    # test the diag GMM module.
-    cluster = GaussianMixture(PointSet, n_components=2, type="diag")
-    cluster.train()
-    result = cluster.predict(cluster.train_set)
-    cluster.visualize(cluster.train_set, result, cluster.color_iter)
-
-    # test the full GMM module.
-    cluster = GaussianMixture(PointSet, n_components=2, type="full")
-    cluster.train()
-    result = cluster.predict(cluster.train_set)
-    cluster.visualize(cluster.train_set, result, cluster.color_iter)
-
-    # test the different K values.
-    cluster = GaussianMixture(PointSet, n_components=3, type="full")
-    cluster.train()
-    result = cluster.predict(cluster.train_set)
-    cluster.visualize(cluster.train_set, result, cluster.color_iter)
-
-    cluster = GaussianMixture(PointSet, n_components=4, type="full")
-    cluster.train()
-    result = cluster.predict(cluster.train_set)
-    cluster.visualize(cluster.train_set, result, cluster.color_iter)
-
-    cluster = GaussianMixture(PointSet, n_components=5, type="full")
-    cluster.train()
-    result = cluster.predict(cluster.train_set)
-    # print(cluster.train_set.shape)
-    cluster.visualize(cluster.train_set, result, cluster.color_iter)
-
-    # advance part train test split. & record the likelihood on train & test set.
-    # from sklearn.model_selection import train_test_split
-    #
-    # X_train, X_test = train_test_split(PointSet, test_size=0.2, random_state=120)
-    #
-    # cluster = GaussianMixture(X_train, test_set=X_test, n_components=2, type="full")
+    # # Todo: Basic Part: you don't need this part to do Advance Part Experiment.
+    # # Todo: Please comment this part when doing Advance Test. To make Experiment clear.
+    # cluster = GaussianMixture(PointSet, n_components=2, type="diag")
     # cluster.train()
+    # result = cluster.predict(cluster.train_set)
+    # cluster.visualize(cluster.train_set, result, cluster.color_iter)
+    #
+    # # test the full GMM module.
+    # cluster = GaussianMixture(PointSet, n_components=2, type="full")
+    # cluster.train()
+    # result = cluster.predict(cluster.train_set)
+    # cluster.visualize(cluster.train_set, result, cluster.color_iter)
+    #
+    # # test the different K values.
+    # cluster = GaussianMixture(PointSet, n_components=3, type="full")
+    # cluster.train()
+    # result = cluster.predict(cluster.train_set)
+    # cluster.visualize(cluster.train_set, result, cluster.color_iter)
+    #
+    # cluster = GaussianMixture(PointSet, n_components=4, type="full")
+    # cluster.train()
+    # result = cluster.predict(cluster.train_set)
+    # cluster.visualize(cluster.train_set, result, cluster.color_iter)
+    #
+    # cluster = GaussianMixture(PointSet, n_components=5, type="full")
+    # cluster.train()
+    # result = cluster.predict(cluster.train_set)
+    # # print(cluster.train_set.shape)
+    # cluster.visualize(cluster.train_set, result, cluster.color_iter)
+
+    # # Todo: Advance Part: you don't need this part to do Basic Part Experiment.
+    # # Todo: Please comment this part when doing Basic Test. To make Experiment clear.
+    # advance part train test split. & record the likelihood on train & test set.
+    from sklearn.model_selection import train_test_split
+
+    X_train, X_test = train_test_split(PointSet, test_size=0.2, random_state=16)
+
+    # cluster = GaussianMixture(X_train, test_set=X_test, has_test=True, n_components=2, type="full")
+    # cluster.train()
+    #
     # result_train = cluster.predict(cluster.train_set)
     # cluster.visualize(cluster.train_set, result_train, cluster.color_iter)
     #
     # result_test = cluster.predict(cluster.test_set)
     # cluster.visualize(cluster.test_set, result_test, cluster.color_iter)
 
+    def showAverageLikelihoodCurve(cluster):
+        plt.title(f"average likelihood by Iterator (Train & Test) k={cluster.n_components}")
+        plt.plot(np.arange(1, len(cluster.record_test)+1), np.array(cluster.record_test) / len(cluster.test_set),
+                 label="test_average_likelihood")
+        # plt.show()
+        plt.plot(np.arange(1, len(cluster.record_train)), np.array(cluster.record_train[1:]) / len(cluster.train_set),
+                 label="train_average_likelihood")
+        plt.legend()
+        plt.show()
 
 
+    cluster = GaussianMixture(X_train, test_set=X_test, has_test=True, n_components=2, type="full")
+    cluster.train()
+    showAverageLikelihoodCurve(cluster)
+
+    cluster = GaussianMixture(X_train, test_set=X_test, has_test=True, n_components=4, type="full")
+    cluster.train()
+    showAverageLikelihoodCurve(cluster)
+
+    cluster = GaussianMixture(X_train, test_set=X_test, has_test=True, n_components=8, type="full")
+    cluster.train()
+    showAverageLikelihoodCurve(cluster)
+
+    cluster = GaussianMixture(X_train, test_set=X_test, has_test=True, n_components=16, type="full")
+    cluster.train()
+    showAverageLikelihoodCurve(cluster)
 

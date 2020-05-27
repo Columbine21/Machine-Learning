@@ -4,9 +4,9 @@
 
 ## （1）实验目标
 
-**基础要求：**使用 GMM 及 EM 算法，尝试使用不同个数的混合成分。对不同的高斯分布，尝试使用关联的协方差 矩阵和独立的协方差矩阵，分析聚类结果。
+**基础要求**使用 GMM 及 EM 算法，尝试使用不同个数的混合成分。对不同的高斯分布，尝试使用关联的协方差 矩阵和独立的协方差矩阵，分析聚类结果。
 
-**提高要求：** 按照 8:2 的比例，随机将数据分为训练集和测试集; 对于不同个数的混合成分， 绘制随着迭代的 进行，模型在训练集和测试集上的似然，并对结果进行讨论。
+**提高要求** 按照 8:2 的比例，随机将数据分为训练集和测试集; 对于不同个数的混合成分， 绘制随着迭代的 进行，模型在训练集和测试集上的似然，并对结果进行讨论。
 
 ## （2）算法原理
 
@@ -33,41 +33,18 @@ $$
 $$
 \alpha_i = \frac{1}{m}\sum_{j=1}^m\gamma_{ji} \tag{5}
 $$
-基于以上公式，已经 EM 算法，我们可以得到我们需要的算法流程图。
+基于以上公式，已经 EM 算法，我们可以得到我们需要的算法流程图。(算法流程图见西瓜书P210,为了留篇幅写结果分析，这里省略了)
 
-## （3）算法流程图
+## （3）实验结果分析
 
-Gaussian Mixture Model 伪代码：
-
--   输入： 样本集 $D = \{x_1, \cdots, x_m\}$ 高斯混合成分个数 $k$
--   过程：
-    -   初始化高斯混合分布的模型参数 $\{(a_i, \mu_i, \Sigma_i\mid 1\leq i\leq k \}$ 
-    -   Repeat: 
-        -   计算 $x_j$ 由各个混合成分生成的后验概率 $\gamma_{ji} = p_M(z_j=i|x_j)$ (_e_step)
-        -   根据后验概率计算新的模型参数。(_m_step)
-            -   计算新均值向量：$\mu_i  = \frac{\sum_{j=1}^m\gamma_{ji}x_j}{\sum_{j=1}^m\gamma_{ji}}$
-            -   计算新协方差矩阵：
-                -   type == "full": $\Sigma'_i = \frac{\sum_{j=1}^m\gamma_{ji}(x_j-\mu_j)(x_j-\mu_j)^T}{\sum_{j=1}^m\gamma_{ji}} $
-            -   计算新混合系数：$\alpha_i = \frac{1}{m}\sum_{j=1}^m\gamma_{ji}$ 
-    -   Until : 满足停止条件（收敛/max_iter）
--   Predict 阶段：根据 $\lambda_j = argmax_{i\in {1, 2,\cdots, k}}\gamma_{ji}$ 确定 $x_j$ 的簇标记 $\lambda_j$ 
--   输出：簇划分 $C = \{C_1, \cdots, C_k\}$
-
-## （4）实验结果分析
-
-### （4.1）基础实验
+### （3.1）基础实验
 
 -   尝试使用不同个数的混合成分。
 
     -   我们这里分别在 type = “full”的情况下进行了 k = 2， 3， 4，5 的实验，实验结果如下：
+    -   我们可以看到随着components数量的增加，模型的log likelihood 逐渐提升。原因是，components的增加导致了模型参数的增加，赋予了模型更好的表述能力，故此模型效果应该有所提升。
 
-        <img src="/Users/yuanziqi/Desktop/学习资料/大三下/机器学习/assignment/PS2/report/img/2_full.png" style="zoom:50%;" />
-
-        <img src="/Users/yuanziqi/Desktop/学习资料/大三下/机器学习/assignment/PS2/report/img/3_full.png" style="zoom:50%;" />
-
-        <img src="/Users/yuanziqi/Desktop/学习资料/大三下/机器学习/assignment/PS2/report/img/4_full.png" style="zoom:50%;" />
-
-        <img src="/Users/yuanziqi/Desktop/学习资料/大三下/机器学习/assignment/PS2/report/img/5_full.png" style="zoom:50%;" />
+    <img src="/Users/yuanziqi/Desktop/学习资料/大三下/机器学习/assignment/PS2/report/img/B_2.png" style="zoom:50%;" />
 
 -   尝试使用关联的协方差矩阵和独立的协方差矩阵，分析聚类结果。
 
@@ -75,17 +52,36 @@ Gaussian Mixture Model 伪代码：
 
     实验效果图展示如下：(左侧为独立情况，右侧为关联情况)
 
-    <img src="/Users/yuanziqi/Desktop/学习资料/大三下/机器学习/assignment/PS2/report/img/2_diag_p.png" style="zoom:50%;" />
-
-    <img src="/Users/yuanziqi/Desktop/学习资料/大三下/机器学习/assignment/PS2/report/img/2_full_p.png" style="zoom:50%;" />
+    <img src="/Users/yuanziqi/Desktop/学习资料/大三下/机器学习/assignment/PS2/report/img/B_1.png" style="zoom:50%;" />
 
 -   两者之间比较显著的差别首先在于其椭圆的形状（是否发生倾斜）。 对于 **独立的协方差矩阵**（假设协方差矩阵为对角阵）来说，由于 “独立假设”，导致两个随机变量之间不存在相关性，表现在其椭圆是没有倾斜的。对于**关联的协方差矩阵** （协方差矩阵没有假设），二维随机变量之间存在了线形相关，这种相互的影响关系表现在椭圆的倾斜上面。
 -   同时，我们可以看到，由于独立依赖的存在，模型相较于无独立依赖的情况少了 2 (n_components) *  (2*2-2) ($n\_features * n\_feautres - n\_features$)（ **$4 / 14 \approx 28.5%$ **） 个参数 。模型的性能上有小幅度下降,似然函数的对数值从 -4546.3  降低到 -4594.6。尽管如此，可以看出模型少部分到参数影响了绝大部分的效果。
 -   补充：在实现模型的过程中，本人参考了sklearn库的官方实现。不得不说，sklearn 库源码阅读就是一个大型的矩阵论实践课。在效率方面，sklearn为了提升 test 的性能，在训练时保存了精度矩阵（协方差矩阵的逆），以及精度矩阵的 cholesky 分解，以此降低了多元高斯分布的概率密度函数的计算开销。（尽管本人在实验过程中虽然没有采用cholesky 分解优化的方法，主要原因是时间紧迫）
 
-### （4.2）扩展实验
+### （3.2）扩展实验
 
+-   按照 8:2 的比例，随机将数据分为训练集和测试集 使用 sklearn 中的 train_test_spit 即可。
 
+    ```
+    from sklearn.model_selection import train_test_split
+    
+    X_train, X_test = train_test_split(PointSet, test_size=0.2, random_state=16)
+    ```
 
+-   对于不同个数的混合成分， 绘制随着迭代的 进行，模型在训练集和测试集上的似然，并对结果进行讨论。
 
+    为了方便显示，我们不直接使用模型在train/test上的likelihood进行分析，而是使用平均likelihood 进行分析。原因是：likelihood函数受到样本数量的直接影响，样本越多生成样本的概率（似然）自然越低。
 
+    我们首先画出了k=2时模型在测试集/训练集上的效果，如下：可以看出，在一下训练/测试集的划分下，模型的结果和基础部分中效果类似。
+
+<img src="/Users/yuanziqi/Desktop/学习资料/大三下/机器学习/assignment/PS2/report/img/Ad_1.png" style="zoom:50%;" />
+
+-   然后，我们进一步画出了对于不同个数的混合成分(k=2,4,8,16)， 随着迭代的进行，模型在训练集和测试集上的似然曲线。
+
+<img src="/Users/yuanziqi/Desktop/学习资料/大三下/机器学习/assignment/PS2/report/img/Ad_2.png" style="zoom:50%;" />
+
+-   通过实验，我们可以看出，k=2的时候，模型在测试/训练集上的averave likelihood 在6 epoch 就达到了瓶颈,
+
+    k=4 的时候模型训练过程总体比较平稳，模型在测试/训练集上的likelihood均一直在提升。k=8的时候，模型开始出现在训练集上仍有提升，在test set上效果下滑的现象。k=16的时候，在大约8 epochs的时候，模型在测试集上效果最优，之后出现测试集上效果下滑问题。
+
+-   可以分析的出，k=2的时候，模型参数过少（模型过于简单），导致模型出现严重的欠拟合现象。k=4时候模型是我们最希望看到的模型，它即有更好的likelihood由能使模型在未知数据上表现更好。随着模型逐渐复杂，k=8/16的时候，模型开始出现过拟合的情况。模型在训练集上效果很好，但是其在未见的数据上效果反而不如k=4的情况。
