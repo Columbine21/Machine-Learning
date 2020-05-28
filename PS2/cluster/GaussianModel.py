@@ -29,7 +29,7 @@ class GaussianMixture:
         n_components : int, defaults to 1.
             The number of mixture components.
 
-        tol : float, defaults to 1e-3.
+        threshold : float, defaults to 1e-3.
             The convergence threshold. EM iterations will stop when the
             lower bound average gain is below this threshold.
 
