@@ -223,4 +223,3 @@ if __name__ == "__main__":
     print(sample("male", all_categories,character_set, rnn))
     # samples("male", all_categories, character_set, rnn, "AGJ")
     # samples("female", all_categories, character_set, rnn, "AGJ")
-
