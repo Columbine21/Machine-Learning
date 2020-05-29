@@ -1,4 +1,6 @@
 *.ipynb_checkpoints
+*.pkl
+PS3/report
 *.docx
 *.idea
 *.DS_Store

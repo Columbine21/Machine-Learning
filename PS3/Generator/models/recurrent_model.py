@@ -1,4 +1,9 @@
+"""Basic Lstm model for the question."""
+
+# Author: Ziqi Yuan <1564123490@qq.com>
+
 import numpy as np
+
 import torch
 from torch import nn
 from torch.distributions import Categorical
@@ -26,17 +31,18 @@ class NameGenerator(nn.Module):
         x, _ = self._forward(x_with_length)
         return x
 
-    def _forward(self, x_with_length, lstm_state=None):
-        x = x_with_length[:, :-1]
-        lengths = x_with_length[:, -1]
-        total_padded_length = x.size(-1)
-        x = self.embedding(x)
-        x = pack_padded_sequence(x, lengths, batch_first=True)
-        x, lstm_state = self.lstm(x, lstm_state)
-        x, _ = pad_packed_sequence(x, batch_first=True, padding_value=PAD_IDX, total_length=total_padded_length)
-        x = self.linear(x)
-        x = x.view(-1, x.size(-1))  # Each timestamp in the separate row, so that we can pass it to CrossEntropyLoss
-        return x, lstm_state
+    def _forward(self, tokenseq_with_length, lstm_state=None):
+        tokenseq = tokenseq_with_length[:, :-1]
+        length = tokenseq_with_length[:, -1]
+        total_padded_length = tokenseq.size(-1)
+        tokenseq = self.embedding(tokenseq)
+        tokenseq = pack_padded_sequence(tokenseq, length, batch_first=True)
+        tokenseq, lstm_state = self.lstm(tokenseq, lstm_state)
+        tokenseq, _ = pad_packed_sequence(tokenseq, batch_first=True, padding_value=PAD_IDX, total_length=total_padded_length)
+        tokenseq = self.linear(tokenseq)
+        tokenseq = tokenseq.view(-1, tokenseq.size(-1))  # Each timestamp in the separate row, so that we can pass it to CrossEntropyLoss
+        return tokenseq, lstm_state
+
 
     def generate(self, device, max_len=40):
         transformer = StringToPaddedIndexesWithLength(max_len)

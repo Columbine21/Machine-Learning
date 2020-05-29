@@ -49,6 +49,7 @@ if __name__ == "__main__":
     model = Model(net, optimizer, criterion, metrics=['accuracy']).to(device)
     history = model.fit_generator(loader, epochs=300, validation_steps=0,
                                   callbacks=[ClipGradient(net, 2), GenerateCallback(net, device)])
+    torch.save(net, "checkpoint/lstm_model.pkl")
     df = pd.DataFrame(history).set_index('epoch')
     df.plot(subplots=True)
     plt.show()

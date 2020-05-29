@@ -4,8 +4,8 @@ import math
 
 
 # Random item from a list
-def randomChoice(l):
-    return l[random.randint(0, len(l) - 1)]
+def randomChoice(array):
+    return array[random.randint(0, len(array) - 1)]
 
 
 def timeSince(since):
