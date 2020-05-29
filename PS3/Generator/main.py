@@ -40,16 +40,17 @@ class GenerateCallback(Callback):
 if __name__ == "__main__":
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     dataset = NameDataset("../data/*male.txt")
-    loader = DataLoader(dataset, batch_size=32, shuffle=True,
-                        num_workers=4,
-                        collate_fn=dataset.sort_by_length_flatten_on_timestamp_collate)
-    net = NameGenerator(len(char_to_idx))
-    optimizer = Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=1e-3)
-    criterion = CrossEntropyLoss(ignore_index=PAD_IDX)
-    model = Model(net, optimizer, criterion, metrics=['accuracy']).to(device)
-    history = model.fit_generator(loader, epochs=300, validation_steps=0,
-                                  callbacks=[ClipGradient(net, 2), GenerateCallback(net, device)])
-    torch.save(net, "checkpoint/lstm_model.pkl")
-    df = pd.DataFrame(history).set_index('epoch')
-    df.plot(subplots=True)
-    plt.show()
+    print(dataset[0])
+    # loader = DataLoader(dataset, batch_size=32, shuffle=True,
+    #                     num_workers=4,
+    #                     collate_fn=dataset.sort_by_length_flatten_on_timestamp_collate)
+    # net = NameGenerator(len(char_to_idx))
+    # optimizer = Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=1e-3)
+    # criterion = CrossEntropyLoss(ignore_index=PAD_IDX)
+    # model = Model(net, optimizer, criterion, metrics=['accuracy']).to(device)
+    # history = model.fit_generator(loader, epochs=300, validation_steps=0,
+    #                               callbacks=[ClipGradient(net, 2), GenerateCallback(net, device)])
+    # torch.save(net, "checkpoint/lstm_model.pkl")
+    # df = pd.DataFrame(history).set_index('epoch')
+    # df.plot(subplots=True)
+    # plt.show()
