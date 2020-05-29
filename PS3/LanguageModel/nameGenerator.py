@@ -54,7 +54,7 @@ def construct_dataset() -> Tuple[List, Dict[str, List]]:
         with open(filename) as file:
             for line in file.readlines():
                 if not line.startswith('# ') and len(line.strip()) > 0:
-                    category_nameList.append(line.strip())
+                    category_nameList.append(line.strip().lower())
         _dataset[category] = category_nameList
     return _all_categories, _dataset
 
@@ -129,13 +129,13 @@ def sample(_category: str,
            _all_categories: List[str],
            _character_set: List,
            model: torch.nn.Module,
-           start_letter='A',
+           start_letter='a',
            max_name_length=15) -> str:
 
     with torch.no_grad():  # no need to track history in sampling
         category_tensor = categoryTensor(_category, _all_categories)
         name_prefix = inputTensor(start_letter, _character_set)
-        hidden = rnn.initHidden()
+        hidden = model.initHidden()
 
         output_name = start_letter
 
@@ -187,40 +187,40 @@ if __name__ == "__main__":
 
     # # Todo: Train the model. & save the trained model into model.pkl
     # # Todo: Next Time we will not train the model again. We only load it from text.
-    # n_iters = 100000
-    # print_every = 5000
-    # plot_every = 500
-    # all_losses = []
-    # total_loss = 0  # Reset every plot_every iters
-    # learning_rate = 0.0005
-    #
-    # rnn = RNN(len(all_categories), len(character_set), 128, len(character_set))
-    # criterion = nn.NLLLoss()
-    # optimizer = optim.Adam(rnn.parameters(), lr=learning_rate)
-    #
-    # start = time.time()
-    #
-    # for epochs in range(1, n_iters + 1):
-    #     output, loss = train(*randomTrainingExample(all_categories, nameSet, character_set), rnn, optimizer, criterion)
-    #     total_loss += loss
-    #
-    #     if epochs % print_every == 0:
-    #         print('%s (%d %d%%) %.4f' % (timeSince(start), epochs, epochs / n_iters * 100, loss))
-    #
-    #     if epochs % plot_every == 0:
-    #         all_losses.append(total_loss / plot_every)
-    #         total_loss = 0
-    #
-    # torch.save(rnn, 'model.pkl')
-    #
-    # plt.figure()
-    # plt.plot(all_losses)
-    # plt.show()
+    n_iters = 40000
+    print_every = 5000
+    plot_every = 500
+    all_losses = []
+    total_loss = 0  # Reset every plot_every iters
+    learning_rate = 0.0005
+
+    rnn = RNN(len(all_categories), len(character_set), 256, len(character_set))
+    criterion = nn.NLLLoss()
+    optimizer = optim.Adam(rnn.parameters(), lr=learning_rate)
+
+    start = time.time()
+
+    for epochs in range(1, n_iters + 1):
+        output, loss = train(*randomTrainingExample(all_categories, nameSet, character_set), rnn, optimizer, criterion)
+        total_loss += loss
+
+        if epochs % print_every == 0:
+            print('%s (%d %d%%) %.4f' % (timeSince(start), epochs, epochs / n_iters * 100, loss))
+
+        if epochs % plot_every == 0:
+            all_losses.append(total_loss / plot_every)
+            total_loss = 0
+
+    torch.save(rnn, 'model.pkl')
+
+    plt.figure()
+    plt.plot(all_losses)
+    plt.show()
 
     # Todo: load model from text file.
     # Todo: Do the name Generator Test.
     rnn = torch.load("model.pkl")
-    print(sample("male", all_categories,character_set, rnn))
+    print(sample("male", all_categories, character_set, rnn, start_letter='g'))
     # samples("male", all_categories, character_set, rnn, "AGJ")
     # samples("female", all_categories, character_set, rnn, "AGJ")
 
