@@ -1,1 +1,1 @@
-from Generator.models.recurrent_model import NameGenerator
+from Generator.models.recurrent_model import Generator
