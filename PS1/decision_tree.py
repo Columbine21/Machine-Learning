@@ -66,7 +66,7 @@ class DecisionTree():
                 false_value = evaluateFunction(falsebranch)
 
                 gain = dataset_value - (truth_partion * truth_value) - (false_value * false_partion)
-                if gain > max_gain:
+                if gain > max_gain + 1e-5:
                     max_gain = gain
                     best_subset = (truthbranch, falsebranch)
                     best_split_attr = split_attr
